@@ -2,29 +2,54 @@
 
 /* eslint-disable no-console */
 const express = require('express')
-const fs = require('fs')
+
 const app = express()
+
+app.use(express.json())
 
 const PORT = 5005
 
-app.use('/', async (req, res, next) => {
-  console.log('Middleware 1-1')
-  const fileContent = await fs.promises.readFile('.gitignore') // async await 활용
+const userRouter = express.Router()
 
-  const requestedAt = new Date()
+const USERS = {
+  15: {
+    nickname: 'foo',
+  },
+}
+userRouter.get('/', (req, res) => {
+  res.send('User list')
+})
+
+userRouter.get('/:id', (req, res) => {
+  console.log('userRouter get ID')
   // @ts-ignore
-  req.requestedAt = requestedAt // 방법 1 req에 값을 넣어서 사용
+  res.send(req.user) // express가 알아서 json.stringfy해줌 헤더에 applicaiton type도 json으로 자동 변경
+})
+
+userRouter.post('/', (req, res) => {
+  res.send('Regist user Info')
+})
+
+userRouter.post('/:id/nickname', (req, res) => {
+  // req.body {"nickname": "bar"}
   // @ts-ignore
-  req.fileContent = fileContent
+  const { user } = req
+  const { nickname } = req.body
+  user.nickname = nickname
+  console.log(nickname)
+  res.send(`User nickname updated: ${nickname}`)
+})
+
+userRouter.param('id', (req, res, next, value) => {
+  // 패턴에 매치되면 먼저 처리하고
+  console.log(`:id param ${value}`)
+  // @ts-ignore
+  req.user = USERS[value]
+
   next()
 })
 
-app.use((req, res) => {
-  console.log('Middleware 2')
-  res.send(
-    `Hello, Express!: Requested at ${req.requestedAt}, ${req.fileContent}`
-  )
-})
+app.use('/users', userRouter)
 
 app.listen(PORT, () => {
   console.log(`The Express server is listening at port: ${PORT}`)
