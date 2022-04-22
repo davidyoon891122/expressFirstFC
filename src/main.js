@@ -15,6 +15,9 @@ const USERS = {
   15: {
     nickname: 'foo',
   },
+  14: {
+    nickname: 'davidyoon',
+  },
 }
 userRouter.get('/', (req, res) => {
   res.send('User list')
