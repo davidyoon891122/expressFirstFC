@@ -9,9 +9,23 @@ app.use(express.json())
 app.set('views', 'src/views')
 app.set('view engine', 'pug')
 
-const PORT = 5005
+app.use('/public', express.static('src/public'))
 
 const userRouter = express.Router()
+
+const PORT = 5005
+
+app.use('/users', userRouter)
+
+app.get('/', (req, res) => {
+  res.render('index', {
+    message: 'Hello, Pug!!',
+  })
+})
+
+app.listen(PORT, () => {
+  console.log(`The Express server is listening at port: ${PORT}`)
+})
 
 const USERS = {
   14: {
@@ -36,6 +50,7 @@ userRouter.get('/:id', (req, res) => {
     res.send(req.user)
   } else if (resMimeType === 'html') {
     res.render('user-profile', {
+      // @ts-ignore
       nickname: req.user.nickname,
     })
   }
@@ -62,16 +77,4 @@ userRouter.param('id', (req, res, next, value) => {
   req.user = USERS[value]
 
   next()
-})
-
-app.use('/users', userRouter)
-
-app.get('/', (req, res) => {
-  res.render('index', {
-    message: 'Hello, Pug!!',
-  })
-})
-
-app.listen(PORT, () => {
-  console.log(`The Express server is listening at port: ${PORT}`)
 })
