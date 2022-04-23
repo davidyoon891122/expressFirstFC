@@ -47,13 +47,24 @@ router.post('/:id/nickname', (req, res) => {
   res.send(`User nickname updated: ${nickname}`)
 })
 
-router.param('id', (req, res, next, value) => {
-  // 패턴에 매치되면 먼저 처리하고
-  console.log(`:id param ${value}`)
-  // @ts-ignore
-  req.user = USERS[value]
+router.param('id', async (req, res, next, value) => {
+  try {
+    // @ts-ignore
+    const user = USERS[value]
 
-  next()
+    if (!user) {
+      const err = new Error('User not found')
+      // @ts-ignore
+      err.statusCode = 404
+      throw err
+    }
+
+    // @ts-ignore
+    req.user = user
+    next()
+  } catch (err) {
+    next(err)
+  }
 })
 
 module.exports = router
