@@ -9,72 +9,13 @@ app.use(express.json())
 app.set('views', 'src/views')
 app.set('view engine', 'pug')
 
-app.use('/public', express.static('src/public'))
-
-const userRouter = express.Router()
-
 const PORT = 5005
 
-app.use('/users', userRouter)
+const userRouter = require('./router/user')
 
-app.get('/', (req, res) => {
-  res.render('index', {
-    message: 'Hello, Pug!!',
-  })
-})
+app.use('/users', userRouter)
+app.use('/public', express.static('src/public'))
 
 app.listen(PORT, () => {
   console.log(`The Express server is listening at port: ${PORT}`)
-})
-
-const USERS = {
-  14: {
-    nickname: 'davidyoon',
-  },
-  15: {
-    nickname: 'foo',
-  },
-  16: {
-    nickname: 'bar',
-  },
-}
-userRouter.get('/', (req, res) => {
-  res.send('User list')
-})
-
-// /users/15
-userRouter.get('/:id', (req, res) => {
-  const resMimeType = req.accepts(['json', 'html'])
-  if (resMimeType === 'json') {
-    // @ts-ignore
-    res.send(req.user)
-  } else if (resMimeType === 'html') {
-    res.render('user-profile', {
-      // @ts-ignore
-      nickname: req.user.nickname,
-    })
-  }
-})
-
-userRouter.post('/', (req, res) => {
-  res.send('Regist user Info')
-})
-
-userRouter.post('/:id/nickname', (req, res) => {
-  // req.body {"nickname": "bar"}
-  // @ts-ignore
-  const { user } = req
-  const { nickname } = req.body
-  user.nickname = nickname
-  console.log(nickname)
-  res.send(`User nickname updated: ${nickname}`)
-})
-
-userRouter.param('id', (req, res, next, value) => {
-  // 패턴에 매치되면 먼저 처리하고
-  console.log(`:id param ${value}`)
-  // @ts-ignore
-  req.user = USERS[value]
-
-  next()
 })
